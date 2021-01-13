@@ -32,7 +32,7 @@ It also plans to support ARM processors as well as Intel processors.
 ## Contents
 * ```src/``` contains the source code for Libnvmmio.
 * ```scripts/``` contains shell scripts to mount kernel filesystems.
-* ```evaluation/``` contains applications and descriptions that measure the performance of Libnvmmio.
+* ```evaluation/``` contains applications and descriptions that evaluate Libnvmmio.
 
 ## Current Limitations
 * **Limited file IO APIs**.
