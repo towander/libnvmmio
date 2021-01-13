@@ -38,6 +38,7 @@ It also plans to support ARM processors as well as Intel processors.
 * **Limited file IO APIs**.
 The current implementation of Libnvmmio handles the following system calls.
 The rest of the calls are passed through to the underlying kernel filesystem that Libnvmmio runs on.
+We will continue to add more file IO APIs to Libnvmmio.
   * ```open, close, read, write, fsync, lseek```
 
 * **Journal wrap**.
