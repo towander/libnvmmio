@@ -57,12 +57,6 @@ A lease mechanism, just like [Strata](https://github.com/ut-osa/strata) did, wil
 A simple kernel API can enable the lease.
 The kernel API will free Libnvmmio from underlying file systems no matter the file systems provide the lease or not.
 
-## Contributors
-* Jungsik Choi, Sungkyunkwan University
-* Jaewan Hong, KAIST
-* Youngjin Kwon, KAIST
-* Hwansoo Han, Sungkyunkwan University
-
 ## Acknowledgments
 This work was supported in part by Samsung Electronics and the National Research Foundation in Korea under PF Class Heterogeneous High-Performance Computer Development (NRF-2016M3C4A7952587).
 
