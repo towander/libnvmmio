@@ -1,0 +1,34 @@
+diff --git a/Makefile b/Makefile
+index 612344d1..7f76a1fd 100644
+--- a/Makefile
++++ b/Makefile
+@@ -22,7 +22,7 @@ endif
+ DEBUGFLAGS = -DFIO_INC_DEBUG
+ CPPFLAGS= -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DFIO_INTERNAL $(DEBUGFLAGS)
+ OPTFLAGS= -g -ffast-math
+-FIO_CFLAGS= -std=gnu99 -Wwrite-strings -Wall -Wdeclaration-after-statement $(OPTFLAGS) $(EXTFLAGS) $(BUILD_CFLAGS) -I. -I$(SRCDIR)
++FIO_CFLAGS= -std=gnu99 -Wwrite-strings -Wall -Wdeclaration-after-statement $(OPTFLAGS) $(EXTFLAGS) $(BUILD_CFLAGS) -I. -I$(SRCDIR) -I../../../src
+ LIBS	+= -lm $(EXTLIBS)
+ PROGS	= fio
+ SCRIPTS = $(addprefix $(SRCDIR)/,tools/fio_generate_plots tools/plot/fio2gnuplot tools/genfio tools/fiologparser.py tools/hist/fiologparser_hist.py tools/hist/fio-histo-log-pctiles.py tools/fio_jsonplus_clat2csv)
+diff --git a/filesetup.c b/filesetup.c
+index 9d033757..8a1fe236 100644
+--- a/filesetup.c
++++ b/filesetup.c
+@@ -5,6 +5,7 @@
+ #include <dirent.h>
+ #include <libgen.h>
+ #include <sys/stat.h>
++#include <libnvmmio.h>
+ 
+ #include "fio.h"
+ #include "smalloc.h"
+@@ -599,7 +600,7 @@ int file_lookup_open(struct fio_file *f, int flags)
+ 	flags |= _O_BINARY;
+ #endif
+ 
+-	f->fd = open(f->file_name, flags, 0600);
++	f->fd = open(f->file_name, flags | O_ATOMIC, 0600);
+ 	return from_hash;
+ }
+ 
