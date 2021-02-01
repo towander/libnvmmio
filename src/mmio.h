@@ -6,11 +6,12 @@
 
 #include "radixlog.h"
 #include "slist.h"
+#include "bravo.h"
 
 typedef enum { UNDO, REDO } policy_t;
 
 typedef struct mmio_struct {
-  pthread_rwlock_t rwlock;
+  bravo_rwlock_t rwlock;
   void *start;
   void *end;
   unsigned long ino;

@@ -90,8 +90,8 @@ static void expend_mmio(mmio_t *mmio, int fd, off_t offset, size_t len) {
   unsigned long current_len, new_len;
   int s;
 
-  RWLOCK_UNLOCK(&mmio->rwlock);
-  RWLOCK_WRITE_LOCK(&mmio->rwlock);
+  bravo_read_unlock(&mmio->rwlock);
+  bravo_write_lock(&mmio->rwlock);
 
   while (check_expend(mmio, offset, len)) {
     current_len = mmio->end - mmio->start;
@@ -114,8 +114,8 @@ static void expend_mmio(mmio_t *mmio, int fd, off_t offset, size_t len) {
   }
   PRINT("expend memory-mapped file: %lu", current_len);
 
-  RWLOCK_UNLOCK(&mmio->rwlock);
-  RWLOCK_READ_LOCK(&mmio->rwlock);
+  bravo_write_unlock(&mmio->rwlock);
+  bravo_read_lock(&mmio->rwlock);
 }
 
 //                (1)                  (2)                  (3)
@@ -185,8 +185,7 @@ void checkpoint_mmio(mmio_t *mmio) {
 
   while (offset < endoff) {
     log_size = LOG_4K;
-    RWLOCK_READ_LOCK(&mmio->rwlock);
-    if (pthread_rwlock_tryrdlock(&mmio->rwlock) == 0) {
+    if (bravo_read_trylock(&mmio->rwlock) == 0) {
       table = find_log_table(&mmio->radixlog, offset);
       if (table) {
         log_size = table->log_size;
@@ -215,7 +214,7 @@ void checkpoint_mmio(mmio_t *mmio) {
           }
         }
       }
-      RWLOCK_UNLOCK(&mmio->rwlock);
+      bravo_read_unlock(&mmio->rwlock);
     }
     offset += NR_ENTRIES(log_size) * LOG_SIZE(log_size);
   }
@@ -280,7 +279,7 @@ ssize_t mmio_write(mmio_t *mmio, int fd, off_t offset, const void *buf,
   /*
    * Acquire the reader-locks of the mmio.
    */
-  RWLOCK_READ_LOCK(&mmio->rwlock);
+  bravo_read_lock(&mmio->rwlock);
 
   if (__glibc_unlikely(check_expend(mmio, offset, len))) {
     expend_mmio(mmio, fd, offset, len);
@@ -413,7 +412,7 @@ ssize_t mmio_write(mmio_t *mmio, int fd, off_t offset, const void *buf,
   /*
    * Release the reader-lock of the mmio.
    */
-  RWLOCK_UNLOCK(&mmio->rwlock);
+  bravo_read_unlock(&mmio->rwlock);
 
   return (ssize_t)ret;
 }
@@ -547,7 +546,7 @@ ssize_t mmio_read(mmio_t *mmio, off_t offset, void *buf, size_t len) {
   /*
    * Acquire the reader-locks of the mmio.
    */
-  RWLOCK_READ_LOCK(&mmio->rwlock);
+  bravo_read_lock(&mmio->rwlock);
 
   /*
    * Acquire all reader-locks of required logs.
@@ -591,7 +590,7 @@ ssize_t mmio_read(mmio_t *mmio, off_t offset, void *buf, size_t len) {
   /*
    * Release the reader-lock of the mmio.
    */
-  RWLOCK_UNLOCK(&mmio->rwlock);
+  bravo_read_unlock(&mmio->rwlock);
 
   return len;
 }
@@ -624,7 +623,7 @@ void commit_mmio(mmio_t *mmio) {
   /*
    * Acquire the writer-lock of the mmio.
    */
-  RWLOCK_WRITE_LOCK(&mmio->rwlock);
+  bravo_write_lock(&mmio->rwlock);
 
   /*
    * Increase the golbal epoch number
@@ -645,5 +644,5 @@ void commit_mmio(mmio_t *mmio) {
   /*
    * Release the writer-lock of the mmio.
    */
-  RWLOCK_UNLOCK(&mmio->rwlock);
+  bravo_write_unlock(&mmio->rwlock);
 }

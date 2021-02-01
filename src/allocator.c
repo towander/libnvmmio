@@ -14,6 +14,7 @@
 #include "mmio.h"
 #include "radixlog.h"
 #include "slist.h"
+#include "bravo.h"
 
 #define DIR_PATH "%s/.libnvmmio-%lu"
 
@@ -337,15 +338,9 @@ static void create_global_idx_list(void) {
 
 static void init_mmio(void *obj) {
   mmio_t *mmio;
-  int s;
 
   mmio = (mmio_t *)obj;
-
-  s = pthread_rwlock_init(&mmio->rwlock, NULL);
-  if (__glibc_unlikely(s != 0)) {
-    HANDLE_ERROR("pthread_rwlock_init");
-  }
-
+  bravo_rwlock_init(&mmio->rwlock);
   mmio->start = NULL;
   mmio->end = NULL;
   mmio->ino = 0;
@@ -460,10 +455,7 @@ void release_mmio(mmio_t *mmio, int flags, int fd) {
           mmio->fsize);
   }
 
-  s = pthread_rwlock_destroy(&mmio->rwlock);
-  if (__glibc_unlikely(s != 0)) {
-    HANDLE_ERROR("pthread_rwlock_destroy");
-  }
+  bravo_rwlock_destroy(&mmio->rwlock);
 
   init_mmio(mmio);
   PUSH_COLLECTOR(mmio, local_mmio_collector, global_mmio_list);
